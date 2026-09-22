@@ -52,6 +52,7 @@
           devShells.clang = pkgs.mkShellNoCC {
             packages = devPackages;
           };
+          packages.nix2docker = pkgs.callPackage ./packages/nix2docker.nix { };
           packages.container-clang = pkgs.mkDevcontainer {
             name = "nix-devcontainer-clang";
             packages = devPackages;

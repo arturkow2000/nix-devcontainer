@@ -324,9 +324,9 @@ let
               To register the image with containerd use:
                 nix run .#container.useNixSnapshotter.copyToContainerd
 
-              To register the image with Docker, register the image with "moby" namespace.
+              To register the image with Docker, use copyToDockerDaemon.
               This requires direct access to the same instance of containerd that Docker uses internally:
-                nix run .#container.useNixSnapshotter.copyToContainerd -- -n moby
+                nix run .#container.useNixSnapshotter.copyToDockerDaemon
 
               Additionally, for Nix containers to work in Docker you need to enable containerd snapshotters
               and set nix snapshotter as Docker storage driver. On NixOS this can be done using:
