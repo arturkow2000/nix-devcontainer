@@ -413,8 +413,8 @@ let
 
                   [[ $# -gt 0 ]] && usage
 
-                  args=(load -i ${system.config.system.build.nix-snapshotter})
-                  exec "${lib.getExe system.pkgs.docker}" "''${args[@]}"
+                  args=(${system.config.system.build.nix-snapshotter})
+                  exec "${lib.getExe (system.pkgs.callPackage ../packages/nix2docker.nix { })}" "''${args[@]}"
                 '';
               };
             };

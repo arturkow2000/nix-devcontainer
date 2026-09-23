@@ -21,7 +21,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     filter =
       name: type:
       let
-        name' = stripNixDerivationPath (lib.warn name name);
+        name' = stripNixDerivationPath name;
       in
       builtins.any (x: x) [
         (name' == "Cargo.toml")
@@ -35,4 +35,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
   cargoHash = "sha256-ANcAEWtstkLKMqgUURzoALOvxW04h50IJCJwXU7qW+I=";
 
   nativeBuildInputs = [ protobuf ];
+  meta = {
+    mainProgram = "nix2docker";
+  };
 })
