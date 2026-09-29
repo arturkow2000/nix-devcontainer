@@ -1,0 +1,22 @@
+[package]
+name = "mklayer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eyre.workspace = true
+snafu.workspace = true
+clap = { workspace = true, features = ["derive"] }
+futures-util = { workspace = true, features = ["io"] }
+pin-project.workspace = true
+tokio = { workspace = true, features = [
+    "macros",
+    "rt-multi-thread",
+    "fs",
+    "io-std",
+] }
+tokio-util = { workspace = true, features = ["compat"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+async-tar.workspace = true
+typed-path = { workspace = true, features = ["serde"] }

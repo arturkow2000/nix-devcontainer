@@ -1,7 +1,6 @@
 {
   lib,
   rustPlatform,
-  protobuf,
 }:
 let
   stripNixDerivationPath =
@@ -14,11 +13,11 @@ let
     lib.concatStringsSep "/" (lib.drop 1 p2);
   cargoFlags = [
     "--package"
-    "nix2docker"
+    "mklayer"
   ];
 in
 rustPlatform.buildRustPackage (finalAttrs: {
-  name = "nix2docker";
+  name = "mklayer";
 
   src = lib.cleanSourceWith {
     src = lib.cleanSource ./..;
@@ -39,8 +38,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
   cargoBuildFlags = cargoFlags;
   cargoTestFlags = cargoFlags;
 
-  nativeBuildInputs = [ protobuf ];
   meta = {
-    mainProgram = "nix2docker";
+    mainProgram = "mklayer";
   };
 })
