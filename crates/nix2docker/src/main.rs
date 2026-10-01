@@ -20,7 +20,7 @@ use const_format::concatcp;
 use containerd_client::{
     services::v1::{
         CreateImageRequest, CreateRequest, DeleteRequest, Image, TransferRequest,
-        images_client::ImagesClient, streaming_client::StreamingClient,
+        UpdateImageRequest, images_client::ImagesClient, streaming_client::StreamingClient,
         transfer_client::TransferClient,
     },
     types::{
@@ -354,33 +354,79 @@ async fn upload_tar_and_create_ref<R: AsyncRead + Unpin>(
     // Create the reference.
     // At this point image becomes visible in `docker image ls`. Reference becomes new, permanent
     // gc root so content isn't garbage collected.
-    images
-        .create(with_namespace!(
-            CreateImageRequest {
-                image: Some(Image {
-                    name: name.clone(),
-                    labels: HashMap::new(),
-                    target: Some(containerd_client::types::Descriptor {
-                        media_type: media_type.to_string(),
-                        digest: format!("sha256:{}", hexstring(index_digest)),
-                        size: index_size as _,
-                        annotations,
-                    }),
-                    created_at: None,
-                    updated_at: None,
-                }),
-                source_date_epoch: None,
-            },
-            DOCKER_NS
-        ))
-        .await
-        .map_err(|status| Error::RefCreate {
-            name,
-            source: GrpcError {
-                request: concatcp!(CreateImageRequest::PACKAGE, ".", CreateImageRequest::NAME),
-                status,
-            },
-        })?;
+    let image = Image {
+        name: name.clone(),
+        labels: HashMap::new(),
+        target: Some(containerd_client::types::Descriptor {
+            media_type: media_type.to_string(),
+            digest: format!("sha256:{}", hexstring(index_digest)),
+            size: index_size as _,
+            annotations,
+        }),
+        created_at: None,
+        updated_at: None,
+    };
+    loop {
+        match images
+            .create(with_namespace!(
+                CreateImageRequest {
+                    image: Some(image.clone()),
+                    source_date_epoch: None,
+                },
+                DOCKER_NS
+            ))
+            .await
+        {
+            Ok(_) => break,
+            Err(status) if status.code() == tonic::Code::AlreadyExists => {
+                // Try update
+            }
+            Err(status) => {
+                return Err(Error::RefCreate {
+                    name,
+                    source: GrpcError {
+                        request: concatcp!(
+                            CreateImageRequest::PACKAGE,
+                            ".",
+                            CreateImageRequest::NAME
+                        ),
+                        status,
+                    },
+                });
+            }
+        }
+
+        match images
+            .update(with_namespace!(
+                UpdateImageRequest {
+                    image: Some(image.clone()),
+                    update_mask: None,
+                    source_date_epoch: None
+                },
+                DOCKER_NS
+            ))
+            .await
+        {
+            Ok(_) => break,
+            Err(status) if status.code() == tonic::Code::NotFound => {
+                // Try again with create
+            }
+            Err(status) => {
+                return Err(Error::RefCreate {
+                    name,
+                    source: GrpcError {
+                        request: concatcp!(
+                            UpdateImageRequest::PACKAGE,
+                            ".",
+                            UpdateImageRequest::NAME
+                        ),
+                        status,
+                    },
+                });
+            }
+        }
+    }
+
     Ok(())
 }
 
