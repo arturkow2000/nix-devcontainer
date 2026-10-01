@@ -135,6 +135,7 @@ pub async fn stream_layer<W: AsyncWrite + Unpin + Send + Sync>(
                     header
                         .set_link_name(OsStr::from_bytes(target.as_bytes()))
                         .unwrap();
+                    header.set_cksum();
                     tar.append(&header, io::empty()).await.context(IoSnafu)?;
                 }
             }
