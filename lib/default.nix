@@ -390,31 +390,8 @@ let
                 '';
 
                 copyToDockerDaemon = system.pkgs.writeShellScriptBin "copy-to-docker" ''
-                  set -euo pipefail
-
-                  usage() {
-                  cat << EOF
-                  Usage: $0 [options]
-                  EOF
-                  }
-
-                  args=$(getopt -o h -l help -- "$@")
-                  [[ $? -gt 0 ]] && usage
-
-                  eval set -- ''${args}
-                  while :
-                  do
-                    case "$1" in
-                      -h | --help) usage ;;
-                      --) shift; break ;;
-                      *) usage ;;
-                    esac
-                  done
-
-                  [[ $# -gt 0 ]] && usage
-
                   args=(${system.config.system.build.nix-snapshotter})
-                  exec "${lib.getExe (system.pkgs.callPackage ../packages/nix2docker.nix { })}" "''${args[@]}"
+                  exec "${lib.getExe (system.pkgs.callPackage ../packages/nix2docker.nix { })}" "''${args[@]}" "$@"
                 '';
               };
             };
