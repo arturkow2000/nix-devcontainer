@@ -433,6 +433,7 @@ options_downstream_only = [
     r"^users\.populateUnixDatabase$",
     r"^programs\.nushell\.settings$",
     r"^programs\.direnv\.enableNushellIntegration$",
+    r"^programs\.nushell\.completions\.useFish$",
 ]
 options_downstream_only_compiled = [re.compile(r) for r in options_downstream_only]
 
