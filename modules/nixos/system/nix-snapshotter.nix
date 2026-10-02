@@ -510,7 +510,19 @@ in
     system.build.nix-snapshotter =
       let
         copyToRoot = [
-          config.system.build.toplevel
+          (
+            # Some of issues:
+            # - no support for creating nix gcroots and nix database (nix2container has its own logic for that)
+            # - no support for changing nix store uid/gid - could be easily added (we already support suid wrappers),
+            #   except for store paths that are bind-mounted into container by the snapshotter. On typical system
+            #   (system-global nix daemon, store owned by root, rootful containerd/docker) nix mounts will be seen as
+            #   owned by root, on other setups it may be seen as owned by nobody.
+            # - nix attempts to chown bind-mounted paths, idk why it happens but currently it breaks nix completely even
+            #   when running as root
+            lib.warnIf config.nix.enable
+              "config.nix.enable is not supported on nix-snapshotter images and will not work as expected"
+              config.system.build.toplevel
+          )
           config.system.build.etc
         ]
         ++ lib.optional config.security.enableWrappers config.security.wrapperPackage;
