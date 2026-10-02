@@ -112,7 +112,10 @@ let
         ];
       };
       nix = {
-        enable = lib.mkDefault true;
+        # Disable by default, we expect containers to be immutable once built.
+        # Can be enabled to provide limited nix functionality (single-user, no daemon, no sandbox) on nix2container-based images.
+        # Does not work on nix-snapshotter images.
+        enable = lib.mkDefault false;
         extraOptions = ''
           extra-experimental-features = nix-command flakes
           sandbox = false
