@@ -58,6 +58,26 @@ in
         type = lib.types.int;
         default = config.ids.uids.root;
       };
+
+      defaultUser = lib.mkOption {
+        type = with lib.types; either int str;
+        default = config.ids.uids.root;
+        description = ''
+          Default user (either UID or name) to use for spawning processes in the container.
+
+          Can be overridden with Docker's --user option.
+        '';
+      };
+
+      defaultGroup = lib.mkOption {
+        type = with lib.types; either int str;
+        default = config.ids.gids.root;
+        description = ''
+          Default primary group (either GID or name) to use for spawning processes in the container.
+
+          Can be overridden with Docker's --user option.
+        '';
+      };
     };
 
     system.build = {

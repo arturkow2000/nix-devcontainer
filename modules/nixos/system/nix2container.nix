@@ -63,7 +63,8 @@ let
     copyToRoot = [
       config.system.build.toplevel
       config.system.build.etc
-    ] ++ lib.optional config.security.enableWrappers config.security.wrapperPackage;
+    ]
+    ++ lib.optional config.security.enableWrappers config.security.wrapperPackage;
     perms = map (
       {
         package,
@@ -126,6 +127,7 @@ in
           "--login"
         ];
         env = lib.mapAttrsToList (n: v: "${n}=${v}") config.environment.variables;
+        user = "${toString config.system.nixos.defaultUser}:${toString config.system.nixos.defaultGroup}";
       };
       layers = allLayers;
       initializeNixDatabase = config.nix.enable;

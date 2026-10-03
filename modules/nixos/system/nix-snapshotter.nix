@@ -546,6 +546,7 @@ in
                 "--login"
               ];
               env = lib.mapAttrsToList (n: v: "${n}=${v}") config.environment.variables;
+              user = "${toString config.system.nixos.defaultUser}:${toString config.system.nixos.defaultGroup}";
             };
             configFile = pkgs.writeText "config-${baseName}.json" (builtins.toJSON nix-snapshotter-config);
             runtimeClosureInfo = pkgs.closureInfo {

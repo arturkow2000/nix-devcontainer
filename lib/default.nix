@@ -45,6 +45,8 @@ let
           # by root by are owned by given uid/gid.
           nixStoreUid = defaultUser.uid;
           nixStoreGid = defaultUser.gid;
+          defaultUser = defaultUser.uid;
+          defaultGroup = defaultUser.gid;
         })
       ];
       system.stateVersion = lib.mkDefault lib.trivial.release;

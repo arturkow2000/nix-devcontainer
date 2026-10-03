@@ -430,6 +430,7 @@ options_downstream_only = [
     r"^system\.nixos\.containerMaxLayers$",
     r"^system\.nixos\.containerName$",
     r"^system\.nixos\.nixStore(Uid|Gid)$",
+    r"^system\.nixos\.default(User|Group)$",
     r"^users\.populateUnixDatabase$",
     r"^programs\.nushell\.settings$",
     r"^programs\.direnv\.enableNushellIntegration$",
