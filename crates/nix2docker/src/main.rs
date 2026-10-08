@@ -41,6 +41,7 @@ use tokio::{
     io::{self, AsyncRead, AsyncReadExt as _, AsyncSeek, AsyncSeekExt as _},
     join,
 };
+use tokio_util::sync::CancellationToken;
 use tonic::{
     Extensions, Request,
     metadata::{MetadataMap, MetadataValue},
@@ -447,6 +448,8 @@ async fn upload_archive<R: AsyncRead + Unpin>(
         meta
     };
     let stream_id = Uuid::new_v4();
+    let stream_wait_cancel = CancellationToken::new();
+    let stream_wait_cancel_2 = stream_wait_cancel.clone();
     let stream =
         util::ContainerdStreamingChannel::new(streaming, stream_id.to_string(), meta.clone())
             .await
@@ -518,13 +521,17 @@ async fn upload_archive<R: AsyncRead + Unpin>(
             request: concatcp!(TransferRequest::PACKAGE, ".", TransferRequest::NAME),
             status,
         })?;
+        // Containerd sometimes doesn't close the stream causing stream.process() to hang.
+        // Cancel stream.process() on transfer() completion.
+        stream_wait_cancel_2.cancel();
 
         Result::<_, GrpcError>::Ok(())
     };
-    let (x, y, z) = join!(copy_task, transfer_task, stream.process());
+    let stream_process_fut = { stream_wait_cancel.run_until_cancelled_owned(stream.process()) };
+    let (x, y, z) = join!(copy_task, transfer_task, stream_process_fut);
     x?;
     y?;
-    z?;
+    z.transpose()?;
 
     Ok(())
 }
