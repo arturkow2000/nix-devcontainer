@@ -1,4 +1,5 @@
 use std::{
+    cmp::min,
     ffi::OsStr,
     mem::forget,
     os::unix::ffi::OsStrExt,
@@ -12,7 +13,7 @@ use pin_project::pin_project;
 use snafu::{ResultExt, Snafu};
 use tokio::{
     fs,
-    io::{self, AsyncBufReadExt, AsyncRead, AsyncWrite, BufReader, Lines},
+    io::{self, AsyncBufReadExt, AsyncRead, AsyncReadExt, AsyncWrite, BufReader, Lines},
 };
 
 mod entry;
@@ -130,10 +131,27 @@ pub async fn stream_layer<W: AsyncWrite + Unpin + Send + Sync>(
                     uid,
                     gid,
                 } => {
+                    const LINKNAME_MAX: usize = 100;
+                    if target.as_bytes().len() > LINKNAME_MAX {
+                        let mut long = Header::new_gnu();
+                        long.set_path("././@LongLink").unwrap();
+                        long.set_entry_type(EntryType::GNULongLink);
+                        long.set_uid(uid);
+                        long.set_gid(gid);
+                        long.set_mode(0o777);
+                        long.set_size(target.as_bytes().len() as u64 + 1);
+                        long.set_cksum();
+                        tar.append(&long, target.as_bytes().chain(&[0][..]))
+                            .await
+                            .context(IoSnafu)?;
+                    }
+
                     let mut header = new_header(path, uid, gid, 0o777);
                     header.set_entry_type(EntryType::Symlink);
                     header
-                        .set_link_name(OsStr::from_bytes(target.as_bytes()))
+                        .set_link_name(OsStr::from_bytes(
+                            &target.as_bytes()[..min(target.as_bytes().len(), LINKNAME_MAX)],
+                        ))
                         .unwrap();
                     header.set_cksum();
                     tar.append(&header, io::empty()).await.context(IoSnafu)?;
