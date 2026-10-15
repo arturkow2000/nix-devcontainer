@@ -462,7 +462,7 @@ let
     pkgs.runCommand base.name
       {
         nativeBuildInputs = with pkgs; [
-          umoci
+          flake.packages.${flakeArchBuild}.umoci
           jq
         ];
       }
@@ -493,7 +493,9 @@ let
           exit 1
         fi
 
-        ${lib.concatMapStringsSep "\n" (layer: "umoci raw add-layer --image \"$PWD:$tag\" ${layer}") layers}
+        ${lib.concatMapStringsSep "\n" (
+          layer: "umoci raw add-layer --image \"$PWD:$tag\" --prepend ${layer}"
+        ) (lib.reverseList layers)}
         tar cf $out *
       '';
 in

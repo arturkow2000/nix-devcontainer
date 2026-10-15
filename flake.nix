@@ -54,6 +54,7 @@
           };
           packages.nix2docker = pkgs.callPackage ./packages/nix2docker.nix { };
           packages.mklayer = pkgs.callPackage ./packages/mklayer.nix { };
+          packages.umoci = pkgs.callPackage ./packages/umoci.nix { };
           packages.container-clang = pkgs.mkDevcontainer {
             name = "nix-devcontainer-clang";
             packages = devPackages;
