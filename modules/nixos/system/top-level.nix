@@ -19,9 +19,13 @@ let
     ''
     + ''
       mkdir $out/usr
-      while IFS= read -rd "" f; do
-        ln -s "${config.system.path}/$f" $out/usr/
-      done < <(ls -A --zero "${config.system.path}" | sed --zero '/^etc$/d')
+      (
+        cd "${config.system.path}"
+        while IFS= read -rd "" f; do
+          find "$f" -type d -exec mkdir "$out/usr/{}" \;
+          find "$f" ! -type d -exec ln -s '${config.system.path}/{}' "$out/usr/{}" \;
+        done < <(ls -A --zero . | sed --zero '/^etc$/d')
+      )
 
       # devcontainer CLI (and vscode) expects at least /bin/sh available.
       ln -s /usr/{bin,sbin} $out/
