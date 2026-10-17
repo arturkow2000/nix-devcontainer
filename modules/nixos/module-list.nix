@@ -73,4 +73,5 @@
   ./programs/nushell.nix
   ./programs/nushell-devcontainer.nix
   ./security/ca.nix
+  ./hardware/graphics.nix
 ]
