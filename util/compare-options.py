@@ -61,7 +61,10 @@ options_filter_out = [
     r"^ec2\.",
     r"^nixops\.enableDeprecatedAutoLuks",
     # Mostly unusable, but does have some things we may want, e.g. printer drivers, other usermode drivers, for e.g. logic analyzers, JTAG/SWD debuggers, etc.
-    r"^hardware\.",
+    r"^hardware\.(?!graphics\.)",
+    r"^hardware\.graphics\.enable(32Bit)?$",
+    r"^hardware\.graphics\.package(32)?$",
+    r"^hardware\.graphics\.extraPackages(32)?$",
     # Not configurable here, networking is controlled by OCI runtime, not us.
     r"^networking\.",
     r"^nix\.firewall\.",
@@ -435,6 +438,12 @@ options_downstream_only = [
     r"^programs\.nushell\.settings$",
     r"^programs\.direnv\.enableNushellIntegration$",
     r"^programs\.nushell\.completions\.useFish$",
+    r"^hardware\.graphics\.mesa\.(enable|package)$",
+    r"^hardware\.graphics\.nvidia\.enable$",
+    r"^hardware\.graphics\.gbm\.backendsPath$",
+    r"^hardware\.graphics\.vulkan\.(implicitLayerPath|layerPath)$",
+    r"^hardware\.graphics\.vulkan\.driverFiles$",
+    r"^hardware\.graphics\.vulkan\.disabledLayers$",
 ]
 options_downstream_only_compiled = [re.compile(r) for r in options_downstream_only]
 
